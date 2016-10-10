@@ -30,8 +30,9 @@ open class TextMessagePresenterBuilder<ViewModelBuilderT, InteractionHandlerT>
     ViewModelBuilderT.ViewModelT: TextMessageViewModelProtocol,
     InteractionHandlerT: BaseMessageInteractionHandlerProtocol,
     InteractionHandlerT.ViewModelT == ViewModelBuilderT.ViewModelT {
-    typealias ViewModelT = ViewModelBuilderT.ViewModelT
-    typealias ModelT = ViewModelBuilderT.ModelT
+	
+    public typealias ViewModelT = ViewModelBuilderT.ViewModelT
+    public typealias ModelT = ViewModelBuilderT.ModelT
 
     public init(
         viewModelBuilder: ViewModelBuilderT,
@@ -44,7 +45,7 @@ open class TextMessagePresenterBuilder<ViewModelBuilderT, InteractionHandlerT>
     let interactionHandler: InteractionHandlerT?
     let layoutCache = NSCache<AnyObject, AnyObject>()
 
-    lazy var sizingCell: TextMessageCollectionViewCell = {
+    public lazy var sizingCell: TextMessageCollectionViewCell = {
         var cell: TextMessageCollectionViewCell? = nil
         if Thread.isMainThread {
             cell = TextMessageCollectionViewCell.sizingCell()
