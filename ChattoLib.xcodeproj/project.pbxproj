@@ -704,6 +704,7 @@
 				125C41731D9B8AA6000440EB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
