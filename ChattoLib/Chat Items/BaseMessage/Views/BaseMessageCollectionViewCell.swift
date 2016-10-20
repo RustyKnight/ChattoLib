@@ -66,10 +66,13 @@ Subclasses responsability
 
 open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, BackgroundSizingQueryable, AccessoryViewRevealable, UIGestureRecognizerDelegate where BubbleViewType:UIView, BubbleViewType:MaximumLayoutWidthSpecificable, BubbleViewType: BackgroundSizingQueryable {
 	
+	typealias Class = BaseMessageCollectionViewCell
+	
 	public var animationDuration: CFTimeInterval = 0.33
 	open var viewContext: ViewContext = .normal
 	
-	var deleteButton: UIButton!
+	var checkBoxImageView: UIImageView!
+//	var deleteButton: UIButton!
 	
 	public private(set) var isUpdating: Bool = false
 	open func performBatchUpdates(_ updateClosure: @escaping () -> Void, animated: Bool, completion: (() ->())?) {
@@ -111,6 +114,11 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 		didSet {
 			if oldValue != self.isSelected {
 				self.updateViews()
+			}
+			if isSelected {
+				checkBoxImageView.image = selectedImage
+			} else {
+				checkBoxImageView.image = unselectedImage
 			}
 		}
 	}
@@ -157,6 +165,19 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 		let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(BaseMessageCollectionViewCell.avatarTapped(_:)))
 		return tapGestureRecognizer
 	}()
+
+	public private(set) lazy var selectionTapGestureRecognizer: UITapGestureRecognizer = {
+		let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(BaseMessageCollectionViewCell.selectionTapped(_:)))
+		return tapGestureRecognizer
+	}()
+	
+	lazy var selectedImage: UIImage = {
+		return UIImage(named: "checkbox-selected", in: Bundle(for: Class.self), compatibleWith: nil)!
+	}()
+	
+	lazy var unselectedImage: UIImage = {
+		return UIImage(named: "checkbox-unselected", in: Bundle(for: Class.self), compatibleWith: nil)!
+	}()
 	
 	private func commonInit() {
 		self.avatarView = self.createAvatarView()
@@ -171,16 +192,28 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 		self.contentView.isExclusiveTouch = true
 		self.isExclusiveTouch = true
 		
-		deleteButton = UIButton()
-		deleteButton.setTitle("Delete", for: [])
-		deleteButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
-		deleteButton.setTitleColor(UIColor.white, for: [])
-		deleteButton.backgroundColor = UIColor.red
+		checkBoxImageView = UIImageView()
+		checkBoxImageView.image = unselectedImage
+		checkBoxImageView.sizeToFit()
+		checkBoxImageView.frame = CGRect(x: 0,
+		                                 y: -checkBoxImageView.bounds.size.width,
+		                                 width: checkBoxImageView.bounds.size.width,
+		                                 height: checkBoxImageView.bounds.size.height)
+		addSubview(checkBoxImageView)
+		checkBoxImageView.addGestureRecognizer(selectionTapGestureRecognizer)
 		
-		deleteButton.sizeToFit()
-		deleteButton.frame = CGRect(x: 0, y: -deleteButton.bounds.size.width, width: deleteButton.bounds.size.width, height: deleteButton.bounds.size.height)
-		
-		addSubview(deleteButton)
+//		deleteButton = UIButton()
+//		deleteButton.setTitle("Delete", for: [])
+//		deleteButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+//		deleteButton.setTitleColor(UIColor.white, for: [])
+//		deleteButton.backgroundColor = UIColor.red
+//		
+//		deleteButton.sizeToFit()
+//		deleteButton.frame = CGRect(x: 0, y: -deleteButton.bounds.size.width, width: deleteButton.bounds.size.width, height: deleteButton.bounds.size.height)
+//		
+//		addSubview(deleteButton)
+//		
+//		deleteButton.addTarget(self, action: #selector(BaseMessageCollectionViewCell.deleteButtonTapped(_:)), for: .touchUpInside)
 		
 		self.addSubview(self.accessoryTimestampView)
 	}
@@ -195,6 +228,7 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 	
 	open override func prepareForReuse() {
 		super.prepareForReuse()
+		checkBoxImageView.image = unselectedImage
 //		self.removeAccessoryView()
 	}
 	
@@ -253,11 +287,14 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 		                       height: accessoryTimestampView.intrinsicContentSize.height)
 		accessoryTimestampView.frame = timeFrame
 		
-		let buttonFrame = CGRect(x: offsetToRevealAccessoryView - deleteButton.intrinsicContentSize.width,
-		                         y: 0,
-		                         width: deleteButton.intrinsicContentSize.width,
-		                         height: frame.height)
-		deleteButton.frame = buttonFrame
+		let buttonHeight = min(checkBoxImageView.intrinsicContentSize.height, bounds.height)
+		let yPos = (bounds.height - buttonHeight) / 2.0
+		
+		let buttonFrame = CGRect(x: offsetToRevealAccessoryView - checkBoxImageView.intrinsicContentSize.width,
+		                         y: yPos,
+		                         width: checkBoxImageView.intrinsicContentSize.width,
+		                         height: buttonHeight)
+		checkBoxImageView.frame = buttonFrame
 	}
 	
 	open override func sizeThatFits(_ size: CGSize) -> CGSize {
@@ -303,7 +340,7 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 			let layoutConstants = baseStyle.layoutConstants(viewModel: messageViewModel)
 			return self.accessoryTimestampView.intrinsicContentSize.width + layoutConstants.horizontalTimestampMargin
 		} else {
-			return deleteButton.intrinsicContentSize.width
+			return checkBoxImageView.intrinsicContentSize.width
 		}
 	}
 	
@@ -323,7 +360,7 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 				self.layoutIfNeeded()
 			})
 		} else {
-			let size = deleteButton.intrinsicContentSize
+			let size = checkBoxImageView.intrinsicContentSize
 			if offsetToRevealAccessoryView > size.width / 2.0 {
 				offsetToRevealAccessoryView = size.width
 			} else {
@@ -337,6 +374,13 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 	}
 	
 	// MARK: User interaction
+	public var onSelectionTapped: ((_ cell: BaseMessageCollectionViewCell) -> Void)?
+	@objc
+	func selectionTapped(_ sender: Any) {
+		isSelected = !isSelected
+		self.onSelectionTapped?(self)
+	}
+	
 	public var onFailedButtonTapped: ((_ cell: BaseMessageCollectionViewCell) -> Void)?
 	@objc
 	func failedButtonTapped() {
