@@ -69,6 +69,8 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 	public var animationDuration: CFTimeInterval = 0.33
 	open var viewContext: ViewContext = .normal
 	
+	var deleteButton: UIButton!
+	
 	public private(set) var isUpdating: Bool = false
 	open func performBatchUpdates(_ updateClosure: @escaping () -> Void, animated: Bool, completion: (() ->())?) {
 		self.isUpdating = true
@@ -168,6 +170,17 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 		self.contentView.addSubview(self.failedButton)
 		self.contentView.isExclusiveTouch = true
 		self.isExclusiveTouch = true
+		
+		deleteButton = UIButton()
+		deleteButton.setTitle("Delete", for: [])
+		deleteButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+		deleteButton.setTitleColor(UIColor.white, for: [])
+		deleteButton.backgroundColor = UIColor.red
+		
+		deleteButton.sizeToFit()
+		deleteButton.frame = CGRect(x: 0, y: -deleteButton.bounds.size.width, width: deleteButton.bounds.size.width, height: deleteButton.bounds.size.height)
+		
+		addSubview(deleteButton)
 	}
 	
 	open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
@@ -236,6 +249,21 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 			}
 			self.contentView.frame = contentViewframe
 			self.accessoryTimestampView.center = CGPoint(x: self.bounds.width - leftOffsetForAccessoryView + accessoryViewWidth / 2, y: self.contentView.center.y)
+		} else {
+			deleteButton.sizeToFit()
+			var contentViewframe = self.contentView.frame
+			contentViewframe.origin.x = 0
+			
+			if offsetRevealDirection == .right {
+				contentViewframe.origin.x = offsetToRevealAccessoryView
+			}
+			self.contentView.frame = contentViewframe
+			
+			let buttonFrame = CGRect(x: contentViewframe.origin.x - deleteButton.intrinsicContentSize.width,
+			                         y: 0,
+			                         width: deleteButton.intrinsicContentSize.width,
+			                         height: frame.height)
+			deleteButton.frame = buttonFrame
 		}
 	}
 	
@@ -273,37 +301,95 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 		}
 	}
 	
-	public var allowAccessoryViewRevealing: Bool = true
-	
-	open func preferredOffsetToRevealAccessoryView() -> CGFloat? {
-		let layoutConstants = baseStyle.layoutConstants(viewModel: messageViewModel)
-		return self.accessoryTimestampView.intrinsicContentSize.width + layoutConstants.horizontalTimestampMargin
+	var offsetRevealDirection: AccessoryViewRevealDirection = .none {
+		didSet {
+			self.setNeedsLayout()
+		}
 	}
 	
+	public var allowAccessoryViewRevealing: Bool = true
 	
-	open func revealAccessoryView(withOffset offset: CGFloat, animated: Bool) {
-		self.offsetToRevealAccessoryView = offset
-		if self.accessoryTimestampView.superview == nil {
-			if offset > 0 {
-				self.addSubview(self.accessoryTimestampView)
-				self.layoutIfNeeded()
+	public var accessoryViewShouldReset: Bool {
+		get {
+			switch offsetRevealDirection {
+			case .left, .none: return true
+			case .right: return false
 			}
+		}
+	}
+	
+	open func preferredOffsetToRevealAccessoryView(`for` direction: AccessoryViewRevealDirection) -> CGFloat? {
+		switch direction {
+		case .left:
+			let layoutConstants = baseStyle.layoutConstants(viewModel: messageViewModel)
+			return self.accessoryTimestampView.intrinsicContentSize.width + layoutConstants.horizontalTimestampMargin
+		case .right:
+			return deleteButton.intrinsicContentSize.width // Needs to become configurable :P
+		default: return 0
+		}
+//		let layoutConstants = baseStyle.layoutConstants(viewModel: messageViewModel)
+//		return self.accessoryTimestampView.intrinsicContentSize.width + layoutConstants.horizontalTimestampMargin
+	}
+	
+	open func revealAccessoryView(withOffset offset: CGFloat, `for` direction: AccessoryViewRevealDirection, animated: Bool) {
+
+		if offsetRevealDirection == .none || offsetRevealDirection == direction {
+			self.offsetToRevealAccessoryView = offset
+			self.offsetRevealDirection = direction
 			
-			if animated {
-				UIView.animate(withDuration: self.animationDuration, animations: { () -> Void in
+			if offset > 0 {
+				if direction == .left {
+					self.addSubview(self.accessoryTimestampView)
 					self.layoutIfNeeded()
-				})
+				} else if direction == .right {
+					self.layoutIfNeeded()
+				}
+				if animated {
+					UIView.animate(withDuration: self.animationDuration, animations: { () -> Void in
+						self.layoutIfNeeded()
+					})
+				}
 			}
 		} else {
-			if animated {
+			// The user may be swiping left to hide the delete buttons :P
+			if offsetRevealDirection == .right {
+				self.offsetToRevealAccessoryView = deleteButton.intrinsicContentSize.width - offset
+			}
+		}
+	}
+	
+	open func revealAccessoryViewDidStop(`for` direction: AccessoryViewRevealDirection, atOffset offset: CGFloat) {
+		
+		// When hiding the delete buttons, the direction will be left, but we don't want to use left, we need to work
+		// in the right direction
+		var stopDirection = direction
+		if direction == offsetRevealDirection {
+			stopDirection = offsetRevealDirection
+		}
+		
+		switch direction {
+		case .left:
+			offsetRevealDirection = .none
+			offsetToRevealAccessoryView = 0.0
+			if offset != 0 {
 				UIView.animate(withDuration: self.animationDuration, animations: { () -> Void in
 					self.layoutIfNeeded()
 				}, completion: { (finished) -> Void in
-					if offset == 0 {
-						self.removeAccessoryView()
-					}
+					self.removeAccessoryView()
 				})
 			}
+		case .right:
+			let size = deleteButton.intrinsicContentSize
+			if offsetToRevealAccessoryView > size.width / 2.0 {
+				offsetToRevealAccessoryView = size.width
+			} else {
+				offsetToRevealAccessoryView = 0
+				offsetRevealDirection = .none
+			}
+			UIView.animate(withDuration: self.animationDuration, animations: { () -> Void in
+				self.layoutIfNeeded()
+			})
+		default: break
 		}
 	}
 	
