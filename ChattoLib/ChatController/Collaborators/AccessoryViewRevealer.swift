@@ -25,32 +25,32 @@ THE SOFTWARE.
 import Foundation
 
 public protocol AccessoryViewRevealable {
-	func revealAccessoryView(withOffset offset: CGFloat, `for` direction: AccessoryViewRevealDirection, animated: Bool)
-	func preferredOffsetToRevealAccessoryView(`for` direction: AccessoryViewRevealDirection) -> CGFloat? // This allows to sync size in case cells have different sizes for the accessory view. Nil -> no restriction
+	func revealAccessoryView(withOffset offset: CGFloat, animated: Bool)
+	func preferredOffsetToRevealAccessoryView(for offset: CGFloat) -> CGFloat? // This allows to sync size in case cells have different sizes for the accessory view. Nil -> no restriction
 	var allowAccessoryViewRevealing: Bool { get }
 
 	// Let the views decide what should be done when panning stops
-	func revealAccessoryViewDidStop(`for` direction: AccessoryViewRevealDirection, atOffset offset: CGFloat)
+	func revealAccessoryViewDidStop(atOffset offset: CGFloat)
 }
 
-public enum AccessoryViewRevealDirection {
-	case none // Return to normal position
-	case left // Positive transition
-	case right // Negative transition
-	
-	func normalise(_ transition: CGFloat) -> CGFloat {
-		return self == .left ? -transition : transition
-	}
-	
-	static func direction(from: CGPoint) -> AccessoryViewRevealDirection {
-		return from.x < 0.0 ? AccessoryViewRevealDirection.left : AccessoryViewRevealDirection.right
-	}
-}
+//public enum AccessoryViewRevealDirection {
+//	case none // Return to normal position
+//	case left // Positive transition
+//	case right // Negative transition
+//	
+//	func normalise(_ transition: CGFloat) -> CGFloat {
+//		return self == .left ? -transition : transition
+//	}
+//	
+//	static func direction(from: CGPoint) -> AccessoryViewRevealDirection {
+//		return from.x < 0.0 ? AccessoryViewRevealDirection.left : AccessoryViewRevealDirection.right
+//	}
+//}
 
 public struct AccessoryViewRevealerConfig {
 	public let angleThresholdInRads: CGFloat
-	public let translationTransform: (_ rawTranslation: CGFloat, _ direction: AccessoryViewRevealDirection) -> CGFloat
-	public init(angleThresholdInRads: CGFloat, translationTransform: @escaping (_ rawTranslation: CGFloat, _ direction: AccessoryViewRevealDirection) -> CGFloat) {
+	public let translationTransform: (_ rawTranslation: CGFloat) -> CGFloat
+	public init(angleThresholdInRads: CGFloat, translationTransform: @escaping (_ rawTranslation: CGFloat) -> CGFloat) {
 		self.angleThresholdInRads = angleThresholdInRads
 		self.translationTransform = translationTransform
 	}
@@ -58,10 +58,10 @@ public struct AccessoryViewRevealerConfig {
 	public static func defaultConfig() -> AccessoryViewRevealerConfig {
 		return self.init(
 			angleThresholdInRads: 0.0872665, // ~5 degrees
-			translationTransform: { (rawTranslation, direction) -> CGFloat in
+			translationTransform: { (rawTranslation) -> CGFloat in
 				let threshold: CGFloat = 30
 
-				var translation = direction.normalise(rawTranslation)
+				var translation = abs(rawTranslation)
 				return max(0, translation - threshold) / 2
 		})
 	}
@@ -92,7 +92,6 @@ class AccessoryViewRevealer: NSObject, UIGestureRecognizerDelegate {
 	}
 	
 	var config = AccessoryViewRevealerConfig.defaultConfig()
-	var panningDirection: AccessoryViewRevealDirection = .none
 	var panningOffset: CGFloat = 0.0
 	
 	@objc
@@ -102,13 +101,10 @@ class AccessoryViewRevealer: NSObject, UIGestureRecognizerDelegate {
 			break
 		case .changed:
 			let translation = panRecognizer.translation(in: self.collectionView)
-			panningDirection = AccessoryViewRevealDirection.direction(from: translation)
-			panningOffset = self.config.translationTransform(translation.x, panningDirection)
-			self.revealAccessoryView(atOffset: panningOffset,
-			                         in: panningDirection)
+			panningOffset = translation.x
+			self.revealAccessoryView(atOffset: panningOffset)
 		case .ended, .cancelled, .failed:
-			stopRevealingAccessoryView(in: panningDirection, atOffset: panningOffset)
-			panningDirection = .none
+			stopRevealingAccessoryView(atOffset: panningOffset)
 			panningOffset = 0.0
 		default:
 			break
@@ -130,23 +126,27 @@ class AccessoryViewRevealer: NSObject, UIGestureRecognizerDelegate {
 		return angleRads <= self.config.angleThresholdInRads
 	}
 	
-	private func revealAccessoryView(atOffset offset: CGFloat, `in` direction: AccessoryViewRevealDirection) {
+	private func revealAccessoryView(atOffset offset: CGFloat) {
 		// Find max offset (cells can have slighlty different timestamp size ( 3.00 am vs 11.37 pm )
 		let cells: [AccessoryViewRevealable] = self.collectionView.visibleCells.flatMap({$0 as? AccessoryViewRevealable})
-		let offset = min(offset, cells.reduce(0) { (current, cell) -> CGFloat in
-			return max(current, cell.preferredOffsetToRevealAccessoryView(for: direction) ?? 0)
+		var maxOffset = min(abs(offset), cells.reduce(0) { (current, cell) -> CGFloat in
+			return max(current, cell.preferredOffsetToRevealAccessoryView(for: offset) ?? 0)
 		})
+		
+		if offset < 0 {
+			maxOffset *= -1.0
+		}
 		
 		for cell in self.collectionView.visibleCells {
 			if let cell = cell as? AccessoryViewRevealable, cell.allowAccessoryViewRevealing {
-					cell.revealAccessoryView(withOffset: offset, for: direction, animated: offset == 0)
+					cell.revealAccessoryView(withOffset: maxOffset, animated: offset == 0)
 			}
 		}
 	}
-	private func stopRevealingAccessoryView(`in` direction: AccessoryViewRevealDirection, atOffset offset: CGFloat) {
+	private func stopRevealingAccessoryView(atOffset offset: CGFloat) {
 		for cell in self.collectionView.visibleCells {
 			if let cell = cell as? AccessoryViewRevealable, cell.allowAccessoryViewRevealing {
-				cell.revealAccessoryViewDidStop(for: direction, atOffset: offset)
+				cell.revealAccessoryViewDidStop(atOffset: offset)
 			}
 		}
 	}
