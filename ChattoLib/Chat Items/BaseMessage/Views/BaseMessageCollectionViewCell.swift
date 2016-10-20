@@ -31,6 +31,9 @@ public protocol BaseMessageCollectionViewCellStyleProtocol {
 	var failedIconHighlighted: UIImage { get }
 	func attributedStringForDate(_ date: String) -> NSAttributedString
 	func layoutConstants(viewModel: MessageViewModelProtocol) -> BaseMessageCollectionViewCellLayoutConstants
+	
+	var selectedCheckboxIcon: UIImage {get}
+	var unselectedCheckboxIcon: UIImage {get}
 }
 
 public struct BaseMessageCollectionViewCellLayoutConstants {
@@ -104,6 +107,8 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 	var failedIconHighlighted: UIImage!
 	public var baseStyle: BaseMessageCollectionViewCellStyleProtocol! {
 		didSet {
+			self.selectedImage = self.baseStyle.selectedCheckboxIcon
+			self.unselectedImage = self.baseStyle.unselectedCheckboxIcon
 			self.failedIcon = self.baseStyle.failedIcon
 			self.failedIconHighlighted = self.baseStyle.failedIconHighlighted
 			self.updateViews()
@@ -120,6 +125,7 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 			} else {
 				checkBoxImageView.image = unselectedImage
 			}
+			setNeedsDisplay()
 		}
 	}
 	
@@ -171,13 +177,8 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 		return tapGestureRecognizer
 	}()
 	
-	lazy var selectedImage: UIImage = {
-		return UIImage(named: "checkbox-selected", in: Bundle(for: Class.self), compatibleWith: nil)!
-	}()
-	
-	lazy var unselectedImage: UIImage = {
-		return UIImage(named: "checkbox-unselected", in: Bundle(for: Class.self), compatibleWith: nil)!
-	}()
+	var selectedImage: UIImage!
+	var unselectedImage: UIImage!
 	
 	private func commonInit() {
 		self.avatarView = self.createAvatarView()
@@ -199,6 +200,7 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 		                                 y: -checkBoxImageView.bounds.size.width,
 		                                 width: checkBoxImageView.bounds.size.width,
 		                                 height: checkBoxImageView.bounds.size.height)
+		checkBoxImageView.isUserInteractionEnabled = true
 		addSubview(checkBoxImageView)
 		checkBoxImageView.addGestureRecognizer(selectionTapGestureRecognizer)
 		
@@ -287,7 +289,7 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 		                       height: accessoryTimestampView.intrinsicContentSize.height)
 		accessoryTimestampView.frame = timeFrame
 		
-		let buttonHeight = min(checkBoxImageView.intrinsicContentSize.height, bounds.height)
+		let buttonHeight = checkBoxImageView.intrinsicContentSize.height
 		let yPos = (bounds.height - buttonHeight) / 2.0
 		
 		let buttonFrame = CGRect(x: offsetToRevealAccessoryView - checkBoxImageView.intrinsicContentSize.width,
@@ -340,7 +342,7 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 			let layoutConstants = baseStyle.layoutConstants(viewModel: messageViewModel)
 			return self.accessoryTimestampView.intrinsicContentSize.width + layoutConstants.horizontalTimestampMargin
 		} else {
-			return checkBoxImageView.intrinsicContentSize.width
+			return checkBoxImageView.intrinsicContentSize.width * 2
 		}
 	}
 	
@@ -360,9 +362,9 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 				self.layoutIfNeeded()
 			})
 		} else {
-			let size = checkBoxImageView.intrinsicContentSize
-			if offsetToRevealAccessoryView > size.width / 2.0 {
-				offsetToRevealAccessoryView = size.width
+			let size = checkBoxImageView.intrinsicContentSize.width * 2
+			if offsetToRevealAccessoryView > size / 2.0 {
+				offsetToRevealAccessoryView = size
 			} else {
 				offsetToRevealAccessoryView = 0
 			}

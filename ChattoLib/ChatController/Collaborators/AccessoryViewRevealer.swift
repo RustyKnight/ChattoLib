@@ -61,7 +61,7 @@ public struct AccessoryViewRevealerConfig {
 			translationTransform: { (rawTranslation) -> CGFloat in
 				let threshold: CGFloat = 30
 
-				var translation = abs(rawTranslation)
+				let translation = abs(rawTranslation)
 				return max(0, translation - threshold) / 2
 		})
 	}
