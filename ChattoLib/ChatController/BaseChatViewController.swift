@@ -83,6 +83,14 @@ open class BaseChatViewController: UIViewController, UICollectionViewDataSource,
 		self.addInputViews()
 		self.setupKeyboardTracker()
 		self.setupTapGestureRecognizer()
+		if #available(iOS 10.0, *) {
+			// This is messing with the accessories view, until I can
+			// figure out how to invalidate the prefetched cells, I've
+			// turned it off
+			collectionView.isPrefetchingEnabled = false
+		} else {
+			// Fallback on earlier versions
+		}
 	}
 	
 	private func setupTapGestureRecognizer() {

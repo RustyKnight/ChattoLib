@@ -53,6 +53,9 @@ public struct BaseMessageCollectionViewCellLayoutConstants {
 	}
 }
 
+fileprivate var offsetToRevealAccessoryView: CGFloat = 0.0
+fileprivate var accessoryViewStartOffset: CGFloat = 0.0
+
 /**
 Base class for message cells
 
@@ -84,6 +87,7 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 			updateClosure()
 			self.isUpdating = false
 			self.updateViews()
+			self.setNeedsLayout()
 			if animated {
 				self.layoutIfNeeded()
 			}
@@ -94,6 +98,8 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 			})
 		} else {
 			updateAndRefreshViews()
+			self.setNeedsLayout()
+			self.layoutIfNeeded()
 		}
 	}
 	
@@ -204,19 +210,6 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 		addSubview(checkBoxImageView)
 		checkBoxImageView.addGestureRecognizer(selectionTapGestureRecognizer)
 		
-//		deleteButton = UIButton()
-//		deleteButton.setTitle("Delete", for: [])
-//		deleteButton.contentEdgeInsets = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
-//		deleteButton.setTitleColor(UIColor.white, for: [])
-//		deleteButton.backgroundColor = UIColor.red
-//		
-//		deleteButton.sizeToFit()
-//		deleteButton.frame = CGRect(x: 0, y: -deleteButton.bounds.size.width, width: deleteButton.bounds.size.width, height: deleteButton.bounds.size.height)
-//		
-//		addSubview(deleteButton)
-//		
-//		deleteButton.addTarget(self, action: #selector(BaseMessageCollectionViewCell.deleteButtonTapped(_:)), for: .touchUpInside)
-		
 		self.addSubview(self.accessoryTimestampView)
 	}
 	
@@ -231,7 +224,6 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 	open override func prepareForReuse() {
 		super.prepareForReuse()
 		checkBoxImageView.image = unselectedImage
-//		self.removeAccessoryView()
 	}
 	
 	public lazy var failedButton: UIButton = {
@@ -264,7 +256,7 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 	// MARK: layout
 	open override func layoutSubviews() {
 		super.layoutSubviews()
-
+		
 		var contentViewframe = self.contentView.frame
 		contentViewframe.origin.x += offsetToRevealAccessoryView
 		if messageViewModel.isIncoming && offsetToRevealAccessoryView < 0.0 {
@@ -327,13 +319,13 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 	
 	lazy var accessoryTimestampView = UILabel()
 	
-	var offsetToRevealAccessoryView: CGFloat = 0 {
-		didSet {
-			self.setNeedsLayout()
-		}
-	}
-	
-	var accessoryViewStartOffset: CGFloat = 0.0
+//	var offsetToRevealAccessoryView: CGFloat = 0 {
+//		didSet {
+//			self.setNeedsLayout()
+//		}
+//	}
+//	
+//	var accessoryViewStartOffset: CGFloat = 0.0
 	
 	public var allowAccessoryViewRevealing: Bool = true
 	
@@ -360,6 +352,7 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 	
 	open func revealAccessoryView(withOffset offset: CGFloat, animated: Bool) {
 		offsetToRevealAccessoryView = offset + accessoryViewStartOffset
+		setNeedsLayout()
 		if animated {
 			UIView.animate(withDuration: self.animationDuration, animations: { () -> Void in
 				self.layoutIfNeeded()
@@ -371,6 +364,7 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 		var hidden = true
 		if offset < 0.0 {
 			offsetToRevealAccessoryView = 0.0
+			setNeedsLayout()
 			UIView.animate(withDuration: self.animationDuration, animations: { () -> Void in
 				self.layoutIfNeeded()
 			})
@@ -380,8 +374,10 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 			if offsetToRevealAccessoryView > size / 2.0 {
 				hidden = false
 				offsetToRevealAccessoryView = size
+				setNeedsLayout()
 			} else {
 				offsetToRevealAccessoryView = 0
+				setNeedsLayout()
 			}
 			UIView.animate(withDuration: self.animationDuration, animations: { () -> Void in
 				self.layoutIfNeeded()
