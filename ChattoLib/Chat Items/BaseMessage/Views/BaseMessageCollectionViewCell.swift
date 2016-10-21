@@ -54,7 +54,7 @@ public struct BaseMessageCollectionViewCellLayoutConstants {
 }
 
 fileprivate var offsetToRevealAccessoryView: CGFloat = 0.0
-fileprivate var accessoryViewStartOffset: CGFloat = 0.0
+internal var accessoryViewStartOffset: CGFloat = 0.0
 
 /**
 Base class for message cells
@@ -340,6 +340,7 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 	
 	open func revealAccessorySide(withOffset offset: CGFloat) -> AccessoryViewRevealSide {
 		
+//		print("\(offset); \(accessoryViewStartOffset); \(accessoryViewStartOffset + offset)")
 		if offset + accessoryViewStartOffset > 0 {
 			return .left
 		} else if offset + accessoryViewStartOffset < 0 {

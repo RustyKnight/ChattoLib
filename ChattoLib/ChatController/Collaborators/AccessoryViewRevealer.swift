@@ -146,6 +146,11 @@ class AccessoryViewRevealer: NSObject, UIGestureRecognizerDelegate {
 		return angleRads <= self.config.angleThresholdInRads
 	}
 	
+	func hideAccessoryView() {
+		let offset: CGFloat = accessoryViewStartOffset > 0 ? -1 : 1
+		stopRevealingAccessoryView(atOffset: offset)
+	}
+	
 	var lastRevealedSize: AccessoryViewRevealSide = .none
 	
 	private func revealAccessoryView(atOffset offset: CGFloat) {
@@ -182,28 +187,33 @@ class AccessoryViewRevealer: NSObject, UIGestureRecognizerDelegate {
 	
 	private func stopRevealingAccessoryView(atOffset offset: CGFloat) {
 		var hidden = false
-		var side: AccessoryViewRevealSide = .none
+		var side: AccessoryViewRevealSide?
 		for cell in self.collectionView.visibleCells {
 			if let cell = cell as? AccessoryViewRevealable, cell.allowAccessoryViewRevealing {
 				// Hope they all return the same value :P
-				side = cell.revealAccessorySide(withOffset: offset)
+				if side == nil {
+					side = cell.revealAccessorySide(withOffset: offset)
+				}
 				hidden = cell.revealAccessoryViewDidStop(atOffset: offset)
 			}
 		}
 		
+		guard let theSide = side else {
+			lastRevealedSize = .none
+			return
+		}
 		if hidden {
-			if side != .none {
-				accessoryWasHidden(side)
+			if theSide != .none {
+				accessoryWasHidden(theSide)
 			}
 			lastRevealedSize = .none
 		} else if lastRevealedSize == .none {
-			accessoryWasRevealed(side)
-			lastRevealedSize = side
+			accessoryWasRevealed(theSide)
+			lastRevealedSize = theSide
 		}
 	}
 	
 	func accessoryWasHidden(_ side: AccessoryViewRevealSide) {
-		print("\(side) was hidden")
 		let notification = Notification(name: .chattoAccessoryViewHidden,
 		                                object: nil,
 		                                userInfo: [AccessoryViewRevealNotification.side: side])
@@ -212,7 +222,6 @@ class AccessoryViewRevealer: NSObject, UIGestureRecognizerDelegate {
 	}
 	
 	func accessoryWasRevealed(_ side: AccessoryViewRevealSide) {
-		print("\(side) was revealed")
 		let notification = Notification(name: .chattoAccessoryViewRevealed,
 		                                object: nil,
 		                                userInfo: [AccessoryViewRevealNotification.side: side])

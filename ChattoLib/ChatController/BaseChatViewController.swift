@@ -142,6 +142,10 @@ open class BaseChatViewController: UIViewController, UICollectionViewDataSource,
 		self.automaticallyAdjustsScrollViewInsets = false
 	}
 	
+	public func hideAccessoryView() {
+		accessoryViewRevealer.hideAccessoryView()
+	}
+	
 	var unfinishedBatchUpdatesCount: Int = 0
 	var onAllBatchUpdatesFinished: (() -> Void)?
 	
