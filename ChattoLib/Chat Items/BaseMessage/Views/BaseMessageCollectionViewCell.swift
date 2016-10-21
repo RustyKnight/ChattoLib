@@ -338,12 +338,24 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 	public var allowAccessoryViewRevealing: Bool = true
 	
 	open func preferredOffsetToRevealAccessoryView(`for` offset: CGFloat) -> CGFloat? {
+		let layoutConstants = baseStyle.layoutConstants(viewModel: messageViewModel)
 		if offset < 0 {
-			let layoutConstants = baseStyle.layoutConstants(viewModel: messageViewModel)
 			return self.accessoryTimestampView.intrinsicContentSize.width + layoutConstants.horizontalTimestampMargin
 		} else {
-			return checkBoxImageView.intrinsicContentSize.width * 2
+			return checkBoxImageView.intrinsicContentSize.width + layoutConstants.horizontalTimestampMargin
 		}
+	}
+	
+	open func revealAccessorySide(withOffset offset: CGFloat) -> AccessoryViewRevealSide {
+		
+		if offset + accessoryViewStartOffset > 0 {
+			return .left
+		} else if offset + accessoryViewStartOffset < 0 {
+			return .right
+		} else {
+			return .none
+		}
+		
 	}
 	
 	open func revealAccessoryView(withOffset offset: CGFloat, animated: Bool) {
@@ -355,15 +367,18 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 		}
 	}
 	
-	open func revealAccessoryViewDidStop(atOffset offset: CGFloat) {
+	open func revealAccessoryViewDidStop(atOffset offset: CGFloat) -> Bool {
+		var hidden = true
 		if offset < 0.0 {
 			offsetToRevealAccessoryView = 0.0
 			UIView.animate(withDuration: self.animationDuration, animations: { () -> Void in
 				self.layoutIfNeeded()
 			})
 		} else {
-			let size = checkBoxImageView.intrinsicContentSize.width * 2
+			let layoutConstants = baseStyle.layoutConstants(viewModel: messageViewModel)
+			let size = checkBoxImageView.intrinsicContentSize.width + layoutConstants.horizontalTimestampMargin
 			if offsetToRevealAccessoryView > size / 2.0 {
+				hidden = false
 				offsetToRevealAccessoryView = size
 			} else {
 				offsetToRevealAccessoryView = 0
@@ -373,6 +388,7 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 			})
 		}
 		accessoryViewStartOffset = offsetToRevealAccessoryView
+		return hidden
 	}
 	
 	// MARK: User interaction

@@ -24,13 +24,30 @@ THE SOFTWARE.
 
 import Foundation
 
+public enum AccessoryViewRevealSide {
+	case left
+	case right
+	case none
+}
+
+public enum AccessoryViewRevealNotification: String {
+	case side = "chatto.accessoryView.size.key"
+}
+
+public extension NSNotification.Name {
+	static let chattoAccessoryViewRevealed = NSNotification.Name(rawValue: "chatto.accessoryView.revealed")
+	static let chattoAccessoryViewHidden = NSNotification.Name(rawValue: "chatto.accessoryView.hidden")
+}
+
 public protocol AccessoryViewRevealable {
 	func revealAccessoryView(withOffset offset: CGFloat, animated: Bool)
 	func preferredOffsetToRevealAccessoryView(for offset: CGFloat) -> CGFloat? // This allows to sync size in case cells have different sizes for the accessory view. Nil -> no restriction
 	var allowAccessoryViewRevealing: Bool { get }
 
 	// Let the views decide what should be done when panning stops
-	func revealAccessoryViewDidStop(atOffset offset: CGFloat)
+	func revealAccessoryViewDidStop(atOffset offset: CGFloat) -> Bool
+	
+	func revealAccessorySide(withOffset offset: CGFloat) -> AccessoryViewRevealSide
 }
 
 //public enum AccessoryViewRevealDirection {
@@ -62,7 +79,8 @@ public struct AccessoryViewRevealerConfig {
 				let threshold: CGFloat = 30
 
 				let translation = abs(rawTranslation)
-				return max(0, translation - threshold) / 2
+				let multiplier = rawTranslation < 0.0 ? -1.0 : 1.0
+				return (max(0.0, translation - threshold) / 2.0) * CGFloat(multiplier)
 		})
 	}
 }
@@ -101,7 +119,9 @@ class AccessoryViewRevealer: NSObject, UIGestureRecognizerDelegate {
 			break
 		case .changed:
 			let translation = panRecognizer.translation(in: self.collectionView)
-			panningOffset = translation.x
+			let transform = self.config.translationTransform(translation.x)
+//			panningOffset = translation.x
+			panningOffset = transform
 			self.revealAccessoryView(atOffset: panningOffset)
 		case .ended, .cancelled, .failed:
 			stopRevealingAccessoryView(atOffset: panningOffset)
@@ -126,6 +146,8 @@ class AccessoryViewRevealer: NSObject, UIGestureRecognizerDelegate {
 		return angleRads <= self.config.angleThresholdInRads
 	}
 	
+	var lastRevealedSize: AccessoryViewRevealSide = .none
+	
 	private func revealAccessoryView(atOffset offset: CGFloat) {
 		// Find max offset (cells can have slighlty different timestamp size ( 3.00 am vs 11.37 pm )
 		let cells: [AccessoryViewRevealable] = self.collectionView.visibleCells.flatMap({$0 as? AccessoryViewRevealable})
@@ -133,21 +155,68 @@ class AccessoryViewRevealer: NSObject, UIGestureRecognizerDelegate {
 			return max(current, cell.preferredOffsetToRevealAccessoryView(for: offset) ?? 0)
 		})
 		
+		guard maxOffset != 0.0 && offset != 0.0 else {
+			return
+		}
+		
+		let atLimit: Bool = abs(offset) != maxOffset
+		
 		if offset < 0 {
 			maxOffset *= -1.0
 		}
 		
+		var side: AccessoryViewRevealSide = .none
 		for cell in self.collectionView.visibleCells {
 			if let cell = cell as? AccessoryViewRevealable, cell.allowAccessoryViewRevealing {
-					cell.revealAccessoryView(withOffset: maxOffset, animated: offset == 0)
+				if atLimit {
+					side = cell.revealAccessorySide(withOffset: offset)
+				}
+				cell.revealAccessoryView(withOffset: maxOffset, animated: offset == 0)
 			}
+		}
+		if atLimit && side != lastRevealedSize {
+			accessoryWasRevealed(side)
+			lastRevealedSize = side
 		}
 	}
+	
 	private func stopRevealingAccessoryView(atOffset offset: CGFloat) {
+		var hidden = false
+		var side: AccessoryViewRevealSide = .none
 		for cell in self.collectionView.visibleCells {
 			if let cell = cell as? AccessoryViewRevealable, cell.allowAccessoryViewRevealing {
-				cell.revealAccessoryViewDidStop(atOffset: offset)
+				// Hope they all return the same value :P
+				side = cell.revealAccessorySide(withOffset: offset)
+				hidden = cell.revealAccessoryViewDidStop(atOffset: offset)
 			}
 		}
+		
+		if hidden {
+			if side != .none {
+				accessoryWasHidden(side)
+			}
+			lastRevealedSize = .none
+		} else if lastRevealedSize == .none {
+			accessoryWasRevealed(side)
+			lastRevealedSize = side
+		}
+	}
+	
+	func accessoryWasHidden(_ side: AccessoryViewRevealSide) {
+		print("\(side) was hidden")
+		let notification = Notification(name: .chattoAccessoryViewHidden,
+		                                object: nil,
+		                                userInfo: [AccessoryViewRevealNotification.side: side])
+		
+		NotificationCenter.default.post(notification)
+	}
+	
+	func accessoryWasRevealed(_ side: AccessoryViewRevealSide) {
+		print("\(side) was revealed")
+		let notification = Notification(name: .chattoAccessoryViewRevealed,
+		                                object: nil,
+		                                userInfo: [AccessoryViewRevealNotification.side: side])
+		
+		NotificationCenter.default.post(notification)
 	}
 }
