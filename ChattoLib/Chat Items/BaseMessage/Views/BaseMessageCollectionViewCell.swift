@@ -99,7 +99,7 @@ open class BaseMessageCollectionViewCell<BubbleViewType>: UICollectionViewCell, 
 		} else {
 			updateAndRefreshViews()
 			self.setNeedsLayout()
-			self.layoutIfNeeded()
+//			self.layoutIfNeeded()
 		}
 	}
 	
