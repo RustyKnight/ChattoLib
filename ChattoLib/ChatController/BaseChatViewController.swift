@@ -93,7 +93,7 @@ open class BaseChatViewController: UIViewController, UICollectionViewDataSource,
 		}
 	}
 	
-	var keyboardAdjustment: CGFloat {
+	public var keyboardAdjustment: CGFloat {
 		set {
 			guard let keyboardTracker = keyboardTracker else {
 				return
