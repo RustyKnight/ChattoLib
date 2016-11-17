@@ -89,6 +89,7 @@ class KeyboardTracker {
 			return
 		}
 		let bottomConstraint = self.bottomConstraintFromNotification(notification)
+		log(debug: "bottomConstraintFromNotification = \(bottomConstraint)")
 		guard bottomConstraint > 0 else {
 			log(debug: "bottomConstraint <= 0")
 			return
@@ -112,6 +113,7 @@ class KeyboardTracker {
 		}
 		
 		let bottomConstraint = self.bottomConstraintFromNotification(notification)
+		log(debug: "bottomConstraintFromNotification = \(bottomConstraint)")
 		guard bottomConstraint > 0 else {
 			log(debug: "bottomConstraint <= 0")
 			return
@@ -131,11 +133,18 @@ class KeyboardTracker {
 			return
 		}
 		let bottomConstraint = self.bottomConstraintFromNotification(notification)
+		log(debug: "bottomConstraintFromNotification = \(bottomConstraint)")
 		if bottomConstraint == 0 {
 			log(debug: "bottomConstraint == 0, keyboard is hidden")
 			onMainThreadDoLater {
 				self.keyboardStatus = .hidden
 				self.layoutInputAtBottom()
+			}
+		} else {
+			onMainThreadDoLater {
+				self.keyboardStatus = .shown
+				self.layoutInputContainer(withBottomConstraint: bottomConstraint)
+				self.adjustTrackingViewSizeIfNeeded()
 			}
 		}
 	}
