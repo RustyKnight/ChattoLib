@@ -93,6 +93,22 @@ open class BaseChatViewController: UIViewController, UICollectionViewDataSource,
 		}
 	}
 	
+	var keyboardAdjustment: CGFloat {
+		set {
+			guard let keyboardTracker = keyboardTracker else {
+				return
+			}
+			keyboardTracker.keyboardAdjustment = newValue
+		}
+		
+		get {
+			guard let keyboardTracker = keyboardTracker else {
+				return 0.0
+			}
+			return keyboardTracker.keyboardAdjustment
+		}
+	}
+	
 	private func setupTapGestureRecognizer() {
 		self.collectionView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(BaseChatViewController.userDidTapOnCollectionView)))
 	}
