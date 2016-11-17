@@ -167,7 +167,7 @@ class KeyboardTracker {
 		guard rect.height > 0 else { return 0 }
 		let rectInView = self.view.convert(rect, from: nil)
 		guard rectInView.maxY >=~ self.view.bounds.height else { return 0 } // Undocked keyboard
-		return max(0, self.view.bounds.height - rectInView.minY - self.keyboardTrackerView.intrinsicContentSize.height)
+		return max(0, self.view.bounds.height - rectInView.minY - self.keyboardTrackerView.intrinsicContentSize.height - 44)
 	}
 	
 	private func bottomConstraintFromTrackingView() -> CGFloat {
