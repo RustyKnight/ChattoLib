@@ -188,6 +188,16 @@ class KeyboardTracker {
 		guard self.isTracking && self.keyboardStatus == .shown else { return }
 		self.adjustTrackingViewSize()
 	}
+
+	func adjustTrackingViewSizeIfNeeded(from notification: Notification) {
+		adjustTrackingViewSizeIfNeeded()
+		let bottomConstraint = self.bottomConstraintFromNotification(notification)
+		if bottomConstraint == 0 {
+			self.layoutInputAtBottom()
+		} else {
+			self.layoutInputContainer(withBottomConstraint: bottomConstraint)
+		}
+	}
 	
 	private func adjustTrackingViewSize() {
 		let inputContainerHeight = self.inputContainer.bounds.height
