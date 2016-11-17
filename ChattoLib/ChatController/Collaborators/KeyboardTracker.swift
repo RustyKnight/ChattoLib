@@ -172,7 +172,8 @@ class KeyboardTracker {
 		log(debug: "view.height = \(view.bounds.height)")
 		log(debug: "rectInView.minY = \(rectInView.minY)")
 		log(debug: "keyboardTrackerView.intrinsicContentSize.height = \(keyboardTrackerView.intrinsicContentSize.height)")
-		return max(0, self.view.bounds.height - rectInView.minY - self.keyboardTrackerView.intrinsicContentSize.height)
+//		return max(0, self.view.bounds.height - rectInView.minY - self.keyboardTrackerView.intrinsicContentSize.height)
+		return max(0, self.view.bounds.height - rectInView.minY)
 	}
 	
 	private func bottomConstraintFromTrackingView() -> CGFloat {
