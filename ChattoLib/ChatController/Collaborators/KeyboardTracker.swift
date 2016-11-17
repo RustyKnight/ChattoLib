@@ -191,7 +191,9 @@ class KeyboardTracker {
 	
 	private func adjustTrackingViewSize() {
 		let inputContainerHeight = self.inputContainer.bounds.height
+		log(debug: "inputContainerHeight = \(inputContainerHeight)")
 		if self.keyboardTrackerView.preferredSize.height != inputContainerHeight {
+			log(debug: "Update tracker view")
 			self.keyboardTrackerView.preferredSize.height = inputContainerHeight
 			self.isPerformingForcedLayout = true
 			self.keyboardTrackerView.window?.layoutIfNeeded()
@@ -241,7 +243,8 @@ private class KeyboardTrackingView: UIView {
 	private func commonInit() {
 		self.autoresizingMask = .flexibleHeight
 		self.isUserInteractionEnabled = false
-		self.backgroundColor = UIColor.clear
+//		self.backgroundColor = UIColor.clear
+		self.backgroundColor = UIColor.red
 		self.isHidden = true
 	}
 	

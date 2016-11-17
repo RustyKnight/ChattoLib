@@ -201,6 +201,11 @@ open class BaseChatViewController: UIViewController, UICollectionViewDataSource,
 	var notificationCenter = NotificationCenter.default
 	var keyboardTracker: KeyboardTracker!
 	
+	public func updateKeyboardTrackerView() {
+		self.keyboardTracker.adjustTrackingViewSizeIfNeeded()
+		view.setNeedsLayout()
+	}
+	
 	public private(set) var isFirstLayout: Bool = true
 	override open func viewDidLayoutSubviews() {
 		super.viewDidLayoutSubviews()
