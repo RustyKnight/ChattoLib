@@ -185,16 +185,24 @@ class KeyboardTracker {
 	}
 	
 	func adjustTrackingViewSizeIfNeeded() {
-		guard self.isTracking && self.keyboardStatus == .shown else { return }
+		guard self.isTracking && self.keyboardStatus == .shown else {
+			log(debug: "Tracking is not enabled or keyboard is not shown")
+			return
+		}
 		self.adjustTrackingViewSize()
 	}
 
 	func adjustTrackingViewSizeIfNeeded(from notification: Notification) {
+		log(debug: "adjustTrackingViewSizeIfNeeded...")
 		adjustTrackingViewSizeIfNeeded()
 		let bottomConstraint = self.bottomConstraintFromNotification(notification)
+		log(debug: "bottomConstraint = \(bottomConstraint)")
 		if bottomConstraint == 0 {
+			log(debug: "layoutInputAtBottom")
 			self.layoutInputAtBottom()
 		} else {
+			log(debug: "layoutInputAtBottom")
+			log(debug: "layoutInputContainer withBottomConstraint")
 			self.layoutInputContainer(withBottomConstraint: bottomConstraint)
 		}
 	}
@@ -209,6 +217,7 @@ class KeyboardTracker {
 			self.keyboardTrackerView.window?.layoutIfNeeded()
 			self.isPerformingForcedLayout = false
 		}
+		log(debug: "keyboardTrackerView.intrinsicContentSize.height = \(keyboardTrackerView.intrinsicContentSize.height)")
 	}
 	
 	private func layoutInputAtBottom() {
