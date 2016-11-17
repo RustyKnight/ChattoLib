@@ -94,8 +94,10 @@ class KeyboardTracker {
 			return
 		} // Some keyboards may report initial willShow/DidShow notifications with invalid positions
 		log(debug: "keyboard will show")
-		self.keyboardStatus = .showing
-		self.layoutInputContainer(withBottomConstraint: bottomConstraint)
+		onMainThreadDoLater {
+			self.keyboardStatus = .showing
+			self.layoutInputContainer(withBottomConstraint: bottomConstraint)
+		}
 	}
 	
 	@objc
@@ -115,9 +117,11 @@ class KeyboardTracker {
 			return
 		} // Some keyboards may report initial willShow/DidShow notifications with invalid positions
 		log(debug: "keyboard did show")
-		self.keyboardStatus = .shown
-		self.layoutInputContainer(withBottomConstraint: bottomConstraint)
-		self.adjustTrackingViewSizeIfNeeded()
+		onMainThreadDoLater {
+			self.keyboardStatus = .shown
+			self.layoutInputContainer(withBottomConstraint: bottomConstraint)
+			self.adjustTrackingViewSizeIfNeeded()
+		}
 	}
 	
 	@objc
@@ -129,8 +133,10 @@ class KeyboardTracker {
 		let bottomConstraint = self.bottomConstraintFromNotification(notification)
 		if bottomConstraint == 0 {
 			log(debug: "bottomConstraint == 0, keyboard is hidden")
-			self.keyboardStatus = .hidden
-			self.layoutInputAtBottom()
+			onMainThreadDoLater {
+				self.keyboardStatus = .hidden
+				self.layoutInputAtBottom()
+			}
 		}
 	}
 	
@@ -141,8 +147,10 @@ class KeyboardTracker {
 			return
 		}
 		log(debug: "keyboard is hidden")
-		self.keyboardStatus = .hidden
-		self.layoutInputAtBottom()
+		onMainThreadDoLater {
+			self.keyboardStatus = .hidden
+			self.layoutInputAtBottom()
+		}
 	}
 	
 	private func bottomConstraintFromNotification(_ notification: Notification) -> CGFloat {

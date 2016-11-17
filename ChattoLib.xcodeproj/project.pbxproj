@@ -83,6 +83,7 @@
 		125C42131D9B8C73000440EB /* AnimationUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 125C42121D9B8C73000440EB /* AnimationUtils.swift */; };
 		125C42151D9B8C7C000440EB /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 125C42141D9B8C7C000440EB /* Observable.swift */; };
 		12E7A9981DDD93620036F216 /* LogUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12E7A9971DDD93620036F216 /* LogUtilities.swift */; };
+		12E7A99A1DDD9A870036F216 /* APIUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12E7A9991DDD9A870036F216 /* APIUtilities.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -164,6 +165,7 @@
 		125C42121D9B8C73000440EB /* AnimationUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnimationUtils.swift; sourceTree = "<group>"; };
 		125C42141D9B8C7C000440EB /* Observable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
 		12E7A9971DDD93620036F216 /* LogUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogUtilities.swift; sourceTree = "<group>"; };
+		12E7A9991DDD9A870036F216 /* APIUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APIUtilities.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -208,6 +210,7 @@
 				125C41B71D9B8C27000440EB /* UI Components */,
 				125C41991D9B8AE1000440EB /* Utils.swift */,
 				12E7A9971DDD93620036F216 /* LogUtilities.swift */,
+				12E7A9991DDD9A870036F216 /* APIUtilities.swift */,
 			);
 			path = ChattoLib;
 			sourceTree = "<group>";
@@ -492,6 +495,7 @@
 				125C41FC1D9B8C3E000440EB /* BaseMessagePresenter.swift in Sources */,
 				125C41871D9B8ADA000440EB /* BaseChatItemPresenter.swift in Sources */,
 				125C41D61D9B8C27000440EB /* TextChatInputItem.swift in Sources */,
+				12E7A99A1DDD9A870036F216 /* APIUtilities.swift in Sources */,
 				125C418F1D9B8ADA000440EB /* BaseChatViewController.swift in Sources */,
 				125C41931D9B8ADA000440EB /* ChatDataSourceProtocol.swift in Sources */,
 				125C41881D9B8ADA000440EB /* ChatItemCompanion.swift in Sources */,

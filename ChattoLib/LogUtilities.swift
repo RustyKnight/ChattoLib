@@ -29,8 +29,10 @@ enum LogLevel: String, CustomStringConvertible {
 	}
 }
 
-fileprivate func log(_ message: String, level: LogLevel, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
-	print("\(level)|[\(function)] #\(line): \(message)")
+fileprivate func log(_ message: String, level: LogLevel, file: String = #file, function: String = #function, line: UInt = #line) {
+	let url = URL(fileURLWithPath: file)
+	let name = url.lastPathComponent
+	print("\(level)| [\(name) \(function)] #\(line): \(message)")
 }
 
 /**
@@ -38,7 +40,7 @@ Logs info messages
 - Parameters:
 - message: Message
 */
-func log(info message: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
+func log(info message: String, file: String = #file, function: String = #function, line: UInt = #line) {
 	log(message,
 	    level: .info,
 	    file: file,
@@ -46,7 +48,7 @@ func log(info message: String, file: StaticString = #file, function: StaticStrin
 	    line: line)
 }
 
-func log(debug message: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
+func log(debug message: String, file: String = #file, function: String = #function, line: UInt = #line) {
 	log(message,
 	    level: .debug,
 	    file: file,
@@ -54,7 +56,7 @@ func log(debug message: String, file: StaticString = #file, function: StaticStri
 	    line: line)
 }
 
-func log(error message: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
+func log(error message: String, file: String = #file, function: String = #function, line: UInt = #line) {
 	log(message,
 	    level: .error,
 	    file: file,
@@ -62,7 +64,7 @@ func log(error message: String, file: StaticString = #file, function: StaticStri
 	    line: line)
 }
 
-func log(error: Error, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
+func log(error: Error, file: String = #file, function: String = #function, line: UInt = #line) {
 	log("\(error)",
 		level: .error,
 		file: file,
@@ -70,7 +72,7 @@ func log(error: Error, file: StaticString = #file, function: StaticString = #fun
 		line: line)
 }
 
-func log(warning message: String, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
+func log(warning message: String, file: String = #file, function: String = #function, line: UInt = #line) {
 	log(message,
 	    level: .warning,
 	    file: file,
@@ -78,7 +80,7 @@ func log(warning message: String, file: StaticString = #file, function: StaticSt
 	    line: line)
 }
 
-func log(warning: Error, file: StaticString = #file, function: StaticString = #function, line: UInt = #line) {
+func log(warning: Error, file: String = #file, function: String = #function, line: UInt = #line) {
 	log("\(warning)",
 		level: .warning,
 		file: file,
