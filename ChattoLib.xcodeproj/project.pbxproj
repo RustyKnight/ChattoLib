@@ -82,6 +82,7 @@
 		125C42111D9B8C3E000440EB /* ChatItemDecorationAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 125C41FA1D9B8C3E000440EB /* ChatItemDecorationAttributes.swift */; };
 		125C42131D9B8C73000440EB /* AnimationUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 125C42121D9B8C73000440EB /* AnimationUtils.swift */; };
 		125C42151D9B8C7C000440EB /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 125C42141D9B8C7C000440EB /* Observable.swift */; };
+		12E7A9981DDD93620036F216 /* LogUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12E7A9971DDD93620036F216 /* LogUtilities.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -162,6 +163,7 @@
 		125C41FA1D9B8C3E000440EB /* ChatItemDecorationAttributes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChatItemDecorationAttributes.swift; sourceTree = "<group>"; };
 		125C42121D9B8C73000440EB /* AnimationUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnimationUtils.swift; sourceTree = "<group>"; };
 		125C42141D9B8C7C000440EB /* Observable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
+		12E7A9971DDD93620036F216 /* LogUtilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogUtilities.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -205,6 +207,7 @@
 				125C41981D9B8AE1000440EB /* SerialTaskQueue.swift */,
 				125C41B71D9B8C27000440EB /* UI Components */,
 				125C41991D9B8AE1000440EB /* Utils.swift */,
+				12E7A9971DDD93620036F216 /* LogUtilities.swift */,
 			);
 			path = ChattoLib;
 			sourceTree = "<group>";
@@ -532,6 +535,7 @@
 				125C42011D9B8C3E000440EB /* ViewDefinitions.swift in Sources */,
 				125C41DB1D9B8C27000440EB /* CircleProgressIndicatorView.m in Sources */,
 				125C41CD1D9B8C27000440EB /* PhotosInputCameraPicker.swift in Sources */,
+				12E7A9981DDD93620036F216 /* LogUtilities.swift in Sources */,
 				125C41D11D9B8C27000440EB /* PhotosInputView.swift in Sources */,
 				125C420D1D9B8C3E000440EB /* TextMessageViewModel.swift in Sources */,
 				125C41C01D9B8C27000440EB /* ChatInputBar.swift in Sources */,

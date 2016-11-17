@@ -115,18 +115,27 @@ public class BasicChatInputBarPresenter: NSObject, ChatInputBarPresenter {
 	
 	@objc
 	private func keyboardDidChangeFrame(_ notification: Notification) {
-		guard self.allowListenToChangeFrameEvents else { return }
-		guard let value = (notification as NSNotification).userInfo?[UIKeyboardFrameEndUserInfoKey] as? NSValue else { return }
+		guard self.allowListenToChangeFrameEvents else {
+			log(debug: "Not listening to keyboard frame changes")
+			return
+		}
+		guard let value = (notification as NSNotification).userInfo?[UIKeyboardFrameEndUserInfoKey] as? NSValue else {
+			log(debug: "No frame end user value")
+			return
+		}
+		log(debug: "keyboardDidChangeFrame")
 		self.lastKnownKeyboardHeight = value.cgRectValue.height
 	}
 	
 	@objc
 	private func keyboardWillHide(_ notification: Notification) {
+		log(debug: "keyboardWillHide")
 		self.allowListenToChangeFrameEvents = false
 	}
 	
 	@objc
 	private func keyboardWillShow(_ notification: Notification) {
+		log(debug: "keyboardWillShow")
 		self.allowListenToChangeFrameEvents = true
 	}
 }
