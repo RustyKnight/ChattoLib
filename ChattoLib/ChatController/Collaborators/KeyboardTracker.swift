@@ -83,20 +83,16 @@ class KeyboardTracker {
 	@objc
 	private func keyboardWillShow(_ notification: Notification) {
 		guard self.isTracking else {
-			log(debug: "Not tracking keyboard")
 			return
 		}
 		guard !self.isPerformingForcedLayout else {
-			log(debug: "isPerformingForcedLayout")
 			return
 		}
+		adjustTrackingViewSizeIfNeeded()
 		let bottomConstraint = self.bottomConstraintFromNotification(notification)
-		log(debug: "bottomConstraintFromNotification = \(bottomConstraint)")
 		guard bottomConstraint > 0 else {
-			log(debug: "bottomConstraint <= 0")
 			return
 		} // Some keyboards may report initial willShow/DidShow notifications with invalid positions
-		log(debug: "keyboard will show")
 		onMainThreadDoLater {
 			self.keyboardStatus = .showing
 			self.layoutInputContainer(withBottomConstraint: bottomConstraint)
@@ -106,21 +102,17 @@ class KeyboardTracker {
 	@objc
 	private func keyboardDidShow(_ notification: Notification) {
 		guard self.isTracking else {
-			log(debug: "Not tracking keyboard")
 			return
 		}
 		guard !self.isPerformingForcedLayout else {
-			log(debug: "isPerformingForcedLayout")
 			return
 		}
 		
+		adjustTrackingViewSizeIfNeeded()
 		let bottomConstraint = self.bottomConstraintFromNotification(notification)
-		log(debug: "bottomConstraintFromNotification = \(bottomConstraint)")
 		guard bottomConstraint > 0 else {
-			log(debug: "bottomConstraint <= 0")
 			return
 		} // Some keyboards may report initial willShow/DidShow notifications with invalid positions
-		log(debug: "keyboard did show")
 		onMainThreadDoLater {
 			self.keyboardStatus = .shown
 			self.layoutInputContainer(withBottomConstraint: bottomConstraint)
@@ -131,13 +123,11 @@ class KeyboardTracker {
 	@objc
 	private func keyboardWillChangeFrame(_ notification: Notification) {
 		guard self.isTracking else {
-			log(debug: "Not tracking keyboard")
 			return
 		}
+		adjustTrackingViewSizeIfNeeded()
 		let bottomConstraint = self.bottomConstraintFromNotification(notification)
-		log(debug: "bottomConstraintFromNotification = \(bottomConstraint)")
 		if bottomConstraint == 0 {
-			log(debug: "bottomConstraint == 0, keyboard is hidden")
 			onMainThreadDoLater {
 				self.keyboardStatus = .hidden
 				self.layoutInputAtBottom()
@@ -154,10 +144,8 @@ class KeyboardTracker {
 	@objc
 	private func keyboardWillHide(_ notification: Notification) {
 		guard self.isTracking else {
-			log(debug: "Not tracking keyboard")
 			return
 		}
-		log(debug: "keyboard is hidden")
 		onMainThreadDoLater {
 			self.keyboardStatus = .hidden
 			self.layoutInputAtBottom()
@@ -167,14 +155,8 @@ class KeyboardTracker {
 	private func bottomConstraintFromNotification(_ notification: Notification) -> CGFloat {
 		guard let rect = ((notification as NSNotification).userInfo?[UIKeyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else { return 0 }
 		guard rect.height > 0 else { return 0 }
-		log(debug: "keyboard height = \(rect.height)")
 		let rectInView = self.view.convert(rect, from: nil)
-		log(debug: "keyboard height in view = \(rect.height)")
 		guard rectInView.maxY >=~ self.view.bounds.height else { return 0 } // Undocked keyboard
-		log(debug: "view.height = \(view.bounds.height)")
-		log(debug: "rectInView.minY = \(rectInView.minY)")
-		log(debug: "keyboardTrackerView.intrinsicContentSize.height = \(keyboardTrackerView.intrinsicContentSize.height)")
-		log(debug: "keyboardAdjustment = \(keyboardAdjustment)")
 		return max(0, (self.view.bounds.height - rectInView.minY - self.keyboardTrackerView.intrinsicContentSize.height) + keyboardAdjustment)
 	}
 	
@@ -186,38 +168,29 @@ class KeyboardTracker {
 	
 	func adjustTrackingViewSizeIfNeeded() {
 		guard self.isTracking && self.keyboardStatus == .shown else {
-			log(debug: "Tracking is not enabled or keyboard is not shown")
 			return
 		}
 		self.adjustTrackingViewSize()
 	}
 
 	func adjustTrackingViewSizeIfNeeded(from notification: Notification) {
-		log(debug: "adjustTrackingViewSizeIfNeeded...")
 		adjustTrackingViewSizeIfNeeded()
 		let bottomConstraint = self.bottomConstraintFromNotification(notification)
-		log(debug: "bottomConstraint = \(bottomConstraint)")
 		if bottomConstraint == 0 {
-			log(debug: "layoutInputAtBottom")
 			self.layoutInputAtBottom()
 		} else {
-			log(debug: "layoutInputAtBottom")
-			log(debug: "layoutInputContainer withBottomConstraint")
 			self.layoutInputContainer(withBottomConstraint: bottomConstraint)
 		}
 	}
 	
 	private func adjustTrackingViewSize() {
 		let inputContainerHeight = self.inputContainer.bounds.height
-		log(debug: "inputContainerHeight = \(inputContainerHeight)")
 		if self.keyboardTrackerView.preferredSize.height != inputContainerHeight {
-			log(debug: "Update tracker view")
 			self.keyboardTrackerView.preferredSize.height = inputContainerHeight
 			self.isPerformingForcedLayout = true
 			self.keyboardTrackerView.window?.layoutIfNeeded()
 			self.isPerformingForcedLayout = false
 		}
-		log(debug: "keyboardTrackerView.intrinsicContentSize.height = \(keyboardTrackerView.intrinsicContentSize.height)")
 	}
 	
 	private func layoutInputAtBottom() {
