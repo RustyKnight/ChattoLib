@@ -40,7 +40,7 @@ public class TabInputButton: UIButton {
         let images = appearance.images
         let button = TabInputButton(type: .custom)
         button.isExclusiveTouch = true
-        images.forEach { (state, image) in
+        images.forEach { let (state, image) = $0; return
             button.setImage(image, for: state.controlState)
         }
         if let accessibilityIdentifier = accessibilityID {

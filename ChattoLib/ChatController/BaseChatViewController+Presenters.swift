@@ -52,7 +52,7 @@ extension BaseChatViewController: ChatCollectionViewLayoutDelegate {
 			if let visibleCell = self.visibleCells[indexPath], visibleCell === cell {
 				self.visibleCells[indexPath] = nil
 			} else {
-				self.visibleCells.forEach({ (indexPath, storedCell) in
+				self.visibleCells.forEach({ let (indexPath, storedCell) = $0;
 					if cell === storedCell {
 						// Inconsistency found, likely due to very fast updates
 						self.visibleCells[indexPath] = nil

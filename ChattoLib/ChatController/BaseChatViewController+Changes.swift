@@ -97,7 +97,7 @@ extension BaseChatViewController: ChatDataSourceDelegateProtocol {
         let cellsToUpdate = updated(collection: self.visibleCellsFromCollectionViewApi(), withChanges: changes)
         self.visibleCells = cellsToUpdate
 
-        cellsToUpdate.forEach { (indexPath, cell) in
+        cellsToUpdate.forEach { let (indexPath, cell) = $0;
             let presenter = self.presenterForIndexPath(indexPath)
             presenter.configureCell(cell, decorationAttributes: self.decorationAttributesForIndexPath(indexPath))
             presenter.cellWillBeShown(cell) // `createModelUpdates` may have created a new presenter instance for existing visible cell so we need to tell it that its cell is visible

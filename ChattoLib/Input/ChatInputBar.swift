@@ -200,7 +200,7 @@ extension ChatInputBar {
 		self.tabBarContentInsets = appearance.tabBarAppearance.contentInsets
 		self.sendButton.contentEdgeInsets = appearance.sendButtonAppearance.insets
 		self.sendButton.setTitle(appearance.sendButtonAppearance.title, for: .normal)
-		appearance.sendButtonAppearance.titleColors.forEach { (state, color) in
+		appearance.sendButtonAppearance.titleColors.forEach { let (state, color) = $0; return
 			self.sendButton.setTitleColor(color, for: state.controlState)
 		}
 		self.sendButton.titleLabel?.font = appearance.sendButtonAppearance.font

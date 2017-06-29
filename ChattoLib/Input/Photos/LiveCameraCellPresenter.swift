@@ -32,7 +32,8 @@ public final class LiveCameraCellPresenter {
 
     private let cellAppearance: LiveCameraCellAppearance
     private let authorizationStatusProvider: () -> AVAuthorizationStatus
-    public init(cellAppearance: LiveCameraCellAppearance = LiveCameraCellAppearance.createDefaultAppearance(), authorizationStatusProvider: @escaping AVAuthorizationStatusProvider = LiveCameraCellPresenter.createDefaultCameraAuthorizationStatusProvider()) {
+    public init(cellAppearance: LiveCameraCellAppearance = LiveCameraCellAppearance.defaultAppearance,
+                authorizationStatusProvider: @escaping AVAuthorizationStatusProvider = LiveCameraCellPresenter.createDefaultCameraAuthorizationStatusProvider()) {
         self.cellAppearance = cellAppearance
         self.authorizationStatusProvider = authorizationStatusProvider
     }
@@ -42,9 +43,9 @@ public final class LiveCameraCellPresenter {
     }
 
     private static let reuseIdentifier = "LiveCameraCell"
-    private static func createDefaultCameraAuthorizationStatusProvider() -> AVAuthorizationStatusProvider {
+    public static func createDefaultCameraAuthorizationStatusProvider() -> AVAuthorizationStatusProvider {
         return {
-            return AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo)
+            return AVCaptureDevice.authorizationStatus(for: AVMediaType.video)
         }
     }
 
