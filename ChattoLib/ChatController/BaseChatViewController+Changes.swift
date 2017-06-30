@@ -229,7 +229,7 @@ extension BaseChatViewController: ChatDataSourceDelegateProtocol {
     private func updateModels(newItems: [ChatItemProtocol], oldItems: ChatItemCompanionCollection, updateType: UpdateType, completion: @escaping () -> Void) {
         let collectionViewWidth = self.collectionView.bounds.width
         let updateType = self.isFirstLayout ? .firstLoad : updateType
-        let performInBackground = updateType != .firstLoad
+        let performInBackground = false //updateType != .firstLoad
 
         self.autoLoadingEnabled = false
         let perfomBatchUpdates: (_ changes: CollectionChanges, _ updateModelClosure: @escaping () -> Void) -> ()  = { [weak self] (changes, updateModelClosure) in
