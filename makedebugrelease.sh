@@ -1,4 +1,5 @@
-rm -rf Carthage/
+xcodebuild -version
 rm *.zip
-carthage build --no-skip-current --configuration Debug
+rm -rf Carthage
+time carthage build --no-skip-current --configuration Debug
 source makearchive.sh
