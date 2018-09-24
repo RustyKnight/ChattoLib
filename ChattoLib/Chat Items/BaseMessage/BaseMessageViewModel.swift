@@ -132,7 +132,7 @@ public class MessageViewModelDefaultBuilder {
 
     public init() {}
 
-    public static let dateFormatter: DateFormatter = {
+    public static var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale.current
         formatter.dateStyle = .none
